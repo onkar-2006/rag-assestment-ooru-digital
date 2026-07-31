@@ -1,5 +1,10 @@
 import os
+from dotenv import load_dotenv
 from pydantic import BaseModel
+
+# Automatically load environment variables from local .env file
+load_dotenv()
+
 
 class AppConfig(BaseModel):
     # Qdrant Cloud Credentials

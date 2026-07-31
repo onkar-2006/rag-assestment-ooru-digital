@@ -32,11 +32,12 @@ USER QUESTION: {query}
 
 INSTRUCTIONS & CONSTRAINTS:
 1. Provide a comprehensive, helpful answer using the information in the retrieved context above.
-2. Synthesize all relevant facts, sections, tasks, and requirements described in the context.
-3. If the context is completely unrelated to the question, state: "I am unable to answer this question based on the provided document context."
-4. Include inline citations for key facts (e.g., [Docling Technical Report > 3 Processing pipeline, Pages: [3, 4]]).
+2. Synthesize all relevant facts, sections, tasks, and requirements described in the context into clean, natural text.
+3. DO NOT output internal identifiers like "[Chunk ID: chunk_0002]" or "[Chunk ID: ...]" in your response text.
+4. If the context is completely unrelated to the question, state: "I am unable to answer this question based on the provided document context."
 5. Provide a clear, professional answer formatted cleanly in Markdown.
 """
+
 
 
 STRUCTURED_EXTRACTION_PROMPT = """You are a precision Data Extraction Engine. Your task is to extract structured entities, dates, metrics, obligations, or key-value pairs from the document context below into valid JSON.

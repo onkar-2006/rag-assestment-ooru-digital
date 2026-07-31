@@ -112,10 +112,11 @@ class QdrantIndexer:
             )
 
 
+        import uuid
         points = []
         for idx, chunk in enumerate(chunks):
             points.append(PointStruct(
-                id=idx + 1,
+                id=str(uuid.uuid4()),
                 vector=all_vectors[idx],
                 payload={
                     "chunk_id": chunk["chunk_id"],
@@ -128,6 +129,7 @@ class QdrantIndexer:
                     "content": chunk["content"]
                 }
             ))
+
 
         # Batch upsert points (batch size: 20 points) to prevent Qdrant Cloud HTTP timeout
         batch_size_upsert = 20

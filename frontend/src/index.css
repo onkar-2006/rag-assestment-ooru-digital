@@ -81,16 +81,47 @@ code, pre {
   display: inline-block;
   width: 3px;
   height: 1.1em;
-  background-color: #06b6d4;
-  margin-left: 4px;
-  animation: blink 1s infinite;
-  vertical-align: middle;
+  background-color: #818cf8;
+  margin-left: 6px;
+  animation: blink 0.8s infinite;
 }
 
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
 }
+
+/* Page Motion & Reveal Animations */
+@keyframes slideFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes zoomFadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-motion-enter {
+  animation: slideFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-modal-pop {
+  animation: zoomFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 
 /* Background Animated Gradient Mesh */
 .bg-mesh-dark {

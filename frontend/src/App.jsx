@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import WelcomeHero from './components/WelcomeHero';
 import Sidebar from './components/Sidebar';
 import ChatWorkspace from './components/ChatWorkspace';
 import CitationDrawer from './components/CitationDrawer';
 import UploadingModal from './components/UploadingModal';
+import RequiredUploadModal from './components/RequiredUploadModal';
 
 export default function App() {
   const [hasEntered, setHasEntered] = useState(false);
@@ -16,6 +17,16 @@ export default function App() {
   // Uploading state
   const [isUploading, setIsUploading] = useState(false);
   const [uploadingFileName, setUploadingFileName] = useState('');
+  const [showUploadPromptModal, setShowUploadPromptModal] = useState(false);
+
+  const handleEnterWorkspace = () => {
+    setHasEntered(true);
+    setShowUploadPromptModal(true);
+  };
+
+
+  // Hidden File Input Ref
+  const fileInputRef = useRef(null);
 
   // Automatic Session Purge on Tab Close / Page Unload
   useEffect(() => {
@@ -42,6 +53,14 @@ export default function App() {
     { title: "Summarize Pipeline", prompt: "Summarize Section 3 of the paper" },
     { title: "Cross-Doc Comparison", prompt: "Compare the key findings between document 1 and document 2" }
   ];
+
+  // Trigger File Browser Dialog
+  const triggerFileBrowser = () => {
+    setShowUploadPromptModal(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
 
   // Handle Document Upload
   const handleUpload = async (e) => {
@@ -75,11 +94,14 @@ export default function App() {
         total_pages: data.total_pages,
         total_chunks: data.total_chunks
       }]);
+      setShowUploadPromptModal(false);
     } catch (err) {
       alert(`Document Upload Failed: ${err.message}`);
     } finally {
       setIsUploading(false);
       setUploadingFileName('');
+      // Reset input value to allow re-uploading same file
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -107,8 +129,8 @@ export default function App() {
 
   // Handle Send Message & Token-by-Token SSE Streaming
   const handleSendMessage = async (userPrompt) => {
-    if (!sessionId) {
-      alert("Please upload a document (.pdf or .docx) first to start your research session.");
+    if (!sessionId || documents.length === 0) {
+      setShowUploadPromptModal(true);
       return;
     }
 
@@ -163,15 +185,25 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-black text-slate-100 font-sans flex flex-col antialiased">
+      {/* Hidden File Input Element */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleUpload}
+        accept=".pdf,.docx"
+        className="hidden"
+      />
+
       {!hasEntered ? (
-        <WelcomeHero onEnter={() => setHasEntered(true)} />
+        <WelcomeHero onEnter={handleEnterWorkspace} />
       ) : (
-        <div className="h-screen w-screen flex overflow-hidden bg-black bg-mesh-dark">
+
+        <div className="h-screen w-screen flex overflow-hidden bg-black bg-mesh-dark animate-motion-enter">
           {/* Left Obsidian Sidebar */}
           <Sidebar
             documents={documents}
             activeSessionId={sessionId}
-            onUpload={handleUpload}
+            onUpload={triggerFileBrowser}
             onNewSession={handleNewSession}
           />
 
@@ -197,9 +229,16 @@ export default function App() {
             isOpen={isUploading}
             fileName={uploadingFileName}
           />
+
+          {/* Required Document Upload Modal */}
+          <RequiredUploadModal
+            isOpen={showUploadPromptModal}
+            onUploadClick={triggerFileBrowser}
+          />
         </div>
       )}
     </div>
   );
-
 }
+
+
