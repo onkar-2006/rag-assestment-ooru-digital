@@ -13,7 +13,6 @@ export default function Sidebar({ documents, activeSessionId, onUpload, onNewSes
             </div>
             <div>
               <div className="text-base font-bold text-white tracking-wide">Document Intelligence</div>
-              <div className="text-xs text-cyan-400 font-semibold">LangGraph &amp; Hybrid RAG</div>
             </div>
           </div>
         </div>
@@ -29,18 +28,17 @@ export default function Sidebar({ documents, activeSessionId, onUpload, onNewSes
 
         {/* Upload Trigger Drop Area */}
         <div className="relative group">
-          <label className="flex flex-col items-center justify-center p-5 rounded-2xl border-2 border-dashed border-slate-700 group-hover:border-cyan-500/80 bg-slate-900/60 hover:bg-slate-900 transition-all cursor-pointer">
+          <button
+            type="button"
+            onClick={onUpload}
+            className="w-full flex flex-col items-center justify-center p-5 rounded-2xl border-2 border-dashed border-slate-700 group-hover:border-cyan-500/80 bg-slate-900/60 hover:bg-slate-900 transition-all cursor-pointer"
+          >
             <Upload className="w-7 h-7 text-slate-400 group-hover:text-cyan-400 group-hover:scale-110 transition-all mb-1.5" />
             <span className="text-sm font-bold text-slate-200">Upload PDF / DOCX</span>
             <span className="text-xs text-slate-400 mt-1">Supports multi-document sessions</span>
-            <input
-              type="file"
-              accept=".pdf,.docx"
-              onChange={onUpload}
-              className="hidden"
-            />
-          </label>
+          </button>
         </div>
+
 
         {/* Uploaded Documents List */}
         <div className="space-y-3">
@@ -76,22 +74,9 @@ export default function Sidebar({ documents, activeSessionId, onUpload, onNewSes
           </div>
         </div>
       </div>
-
-      {/* Footer System Status */}
-      <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs space-y-1.5 text-slate-300 font-medium">
-        <div className="flex items-center justify-between">
-          <span className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-            Backend API
-          </span>
-          <span className="text-slate-200 font-mono text-xs font-semibold">Port 8000</span>
-        </div>
-        <div className="flex items-center justify-between text-xs text-slate-400">
-          <span>Qdrant Cloud &amp; BM25</span>
-          <span className="text-cyan-400 font-bold">Active</span>
-        </div>
-      </div>
     </aside>
   );
 }
+
+
 

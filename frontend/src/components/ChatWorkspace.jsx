@@ -31,9 +31,10 @@ export default function ChatWorkspace({ messages, onSendMessage, onInspectCitati
       case 'blocked':
         return <span className="px-2 py-0.5 rounded-md bg-red-950/80 border border-red-800/60 text-red-300 text-[10px] font-semibold flex items-center gap-1"><ShieldAlert className="w-3 h-3"/> Security Violation Blocked</span>;
       default:
-        return <span className="px-2 py-0.5 rounded-md bg-emerald-950/80 border border-emerald-800/60 text-emerald-300 text-[10px] font-semibold">Hybrid Dense + BM25 RAG</span>;
+        return null;
     }
   };
+
 
   return (
     <div className="flex-1 h-full flex flex-col justify-between bg-black relative overflow-hidden">
