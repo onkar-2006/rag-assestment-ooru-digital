@@ -56,11 +56,12 @@ class LangGraphDocumentWorkflow:
             try:
                 self.router_groq_llm = ChatGroq(
                     groq_api_key=config.groq_api_key,
-                    model_name=config.router_model if "llama" in config.router_model else config.groq_model,
+                    model_name="llama-3.1-8b-instant",
                     temperature=0.0
                 )
             except Exception:
                 self.router_groq_llm = self.groq_llm
+
 
         self.workflow = self._build_graph()
 

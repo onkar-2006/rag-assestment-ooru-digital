@@ -35,6 +35,19 @@ class AgentTools:
             except Exception:
                 self.groq_llm = None
 
+        # Self-Hosted / Fine-Tuned Local LLM Client (vLLM / Ollama / LM Studio)
+        self.local_llm = None
+        if config.use_local_llm:
+            try:
+                self.local_llm = ChatOpenAI(
+                    openai_api_key="EMPTY",
+                    openai_api_base=config.local_llm_url,
+                    model_name=config.local_llm_model,
+                    temperature=0.1
+                )
+            except Exception:
+                self.local_llm = None
+
         # ChatOpenAI client via OpenRouter API (Passes native usage tokens to LangSmith)
         self.openrouter_llm = ChatOpenAI(
             openai_api_key=config.openrouter_api_key,
@@ -45,7 +58,16 @@ class AgentTools:
 
     @traceable(name="llm_call")
     def _call_llm(self, prompt: str) -> str:
-        """Call LLM via ChatGroq or ChatOpenAI with automatic LangSmith token usage tracking."""
+        """Call LLM via Self-Hosted vLLM, ChatGroq, or ChatOpenAI with automatic LangSmith tracing."""
+        # 1. Priority: Fine-Tuned Local vLLM Server (If enabled & running)
+        if config.use_local_llm and self.local_llm:
+            try:
+                res = self.local_llm.invoke(prompt)
+                return str(res.content).strip()
+            except Exception:
+                pass  # Fallback to Cloud APIs if local server is unreachable
+
+        # 2. Priority: ChatGroq API
         if self.groq_llm:
             try:
                 res = self.groq_llm.invoke(prompt)
@@ -53,9 +75,10 @@ class AgentTools:
             except Exception:
                 pass
 
-        # ChatOpenAI automatically tracks input, output, and total token usage in LangSmith
+        # 3. Priority: OpenRouter API Fallback
         res = self.openrouter_llm.invoke(prompt)
         return str(res.content).strip()
+
 
 
     @traceable(name="tool_retrieve_context")

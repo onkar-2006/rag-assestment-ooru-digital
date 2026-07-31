@@ -21,7 +21,14 @@ class AppConfig(BaseModel):
     openrouter_base_url: str = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
     embedding_model: str = os.getenv("EMBEDDING_MODEL", "openai/text-embedding-3-small")
     llm_model: str = os.getenv("LLM_MODEL", "openai/gpt-4o-mini")
-    router_model: str = os.getenv("ROUTER_MODEL", "llama-3.1-8b-instant")
+    router_model: str = os.getenv("ROUTER_MODEL", "meta-llama/llama-3.1-8b-instruct")
+
+    # Local / Self-Hosted Fine-Tuned LLM Endpoint Settings (vLLM / Ollama / LM Studio)
+    use_local_llm: bool = os.getenv("USE_LOCAL_LLM", "false").lower() == "true"
+    local_llm_url: str = os.getenv("LOCAL_LLM_URL", "http://localhost:8000/v1")
+    local_llm_model: str = os.getenv("LOCAL_LLM_MODEL", "finetuned_llama3_8b_merged")
+
+
 
     # LangSmith Observability & Tracing Credentials
     langchain_tracing_v2: str = os.getenv("LANGCHAIN_TRACING_V2", "true")
