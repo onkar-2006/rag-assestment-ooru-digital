@@ -50,14 +50,20 @@ class LangGraphDocumentWorkflow:
             except Exception:
                 self.groq_llm = None
 
-        # Lightweight fast model for intent routing (~150ms classification)
-        if config.openrouter_api_key:
+        # Fast small model for intent routing (ChatGroq llama-3.1-8b-instant / llama-3.3-70b)
+        self.router_groq_llm = None
+        if config.groq_api_key:
             try:
-                self.fast_router_llm = config.router_model
+                self.router_groq_llm = ChatGroq(
+                    groq_api_key=config.groq_api_key,
+                    model_name=config.router_model if "llama" in config.router_model else config.groq_model,
+                    temperature=0.0
+                )
             except Exception:
-                self.fast_router_llm = "openai/gpt-4o-mini"
+                self.router_groq_llm = self.groq_llm
 
         self.workflow = self._build_graph()
+
 
     def input_guardrail_node(self, state: AgentGraphState) -> AgentGraphState:
         """LangGraph Node: Scans input query for prompt injection or malicious patterns."""
@@ -89,32 +95,36 @@ class LangGraphDocumentWorkflow:
 
 
     def _call_router_llm(self, user_query: str) -> Dict[str, str]:
-        """Classifies intent via Fast Low-Latency Model (~150ms delay)."""
+        """Classifies intent via ChatGroq fast low-latency model (~150ms classification)."""
         prompt = INTENT_ROUTER_PROMPT.format(user_input=user_query)
         content = ""
 
-        # Use fast router model via OpenRouter API
-        headers = {
-            "Authorization": f"Bearer {config.openrouter_api_key}",
-            "Content-Type": "application/json"
-        }
-        payload = {
-            "model": config.router_model,
-            "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0.0
-        }
-        try:
-            res = requests.post(f"{config.openrouter_base_url}/chat/completions", headers=headers, json=payload, timeout=10)
-            content = res.json()["choices"][0]["message"]["content"].strip()
-        except Exception:
-            if self.groq_llm:
-                try:
-                    res = self.groq_llm.invoke(prompt)
-                    content = str(res.content).strip()
-                except Exception:
-                    return {"intent": "document_qa", "reasoning": "Fallback to RAG"}
-            else:
+        # 1. Try ChatGroq fast router model first
+        if self.router_groq_llm or self.groq_llm:
+            try:
+                llm = self.router_groq_llm or self.groq_llm
+                res = llm.invoke(prompt)
+                content = str(res.content).strip()
+            except Exception:
+                pass
+
+        # 2. Fallback to ChatOpenAI via OpenRouter if Groq is unavailable
+        if not content and config.openrouter_api_key:
+            try:
+                from langchain_openai import ChatOpenAI
+                router_llm = ChatOpenAI(
+                    openai_api_key=config.openrouter_api_key,
+                    openai_api_base=config.openrouter_base_url,
+                    model_name=config.router_model,
+                    temperature=0.0
+                )
+                res = router_llm.invoke(prompt)
+                content = str(res.content).strip()
+            except Exception:
                 return {"intent": "document_qa", "reasoning": "Fallback to RAG"}
+
+        if not content:
+            return {"intent": "document_qa", "reasoning": "Fallback to RAG"}
 
         try:
             clean_str = content.replace("```json", "").replace("```", "").strip()

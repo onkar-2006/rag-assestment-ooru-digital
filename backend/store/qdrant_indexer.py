@@ -60,6 +60,9 @@ class QdrantIndexer:
         """Generates embedding via OpenRouter API."""
         return self.get_embeddings_batch([text])[0]
 
+    from langsmith import traceable
+
+    @traceable(name="embedding_generation")
     def get_embeddings_batch(self, texts: List[str]) -> List[List[float]]:
         """Generates vector embeddings in batch mode to cut network overhead by ~80%."""
         if not texts:
@@ -79,6 +82,7 @@ class QdrantIndexer:
             res = requests.post(f"{config.openrouter_base_url}/embeddings", headers=headers, json=payload, timeout=25)
             data = res.json().get("data", [])
             return [item["embedding"] for item in data]
+
 
     def index_chunks(self, chunks: List[Dict[str, Any]], session_id: Optional[str] = None) -> Dict[str, Any]:
         """Indexes document chunks into Qdrant vector store in optimized batches."""

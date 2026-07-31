@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { ArrowRight, ShieldCheck, Cpu, Database, FileText } from 'lucide-react';
 
 export default function WelcomeHero({ onEnter }) {
-  const fullText = "Agentic Document Intelligence Assistant...";
+  const fullText = "Agentic Document Intelligence Assistant";
   const [typedText, setTypedText] = useState("");
+
   const [isTypingComplete, setIsTypingComplete] = useState(false);
 
   useEffect(() => {
