@@ -62,48 +62,53 @@ export default function App() {
     }
   };
 
-  // Handle Document Upload
+  // Handle Document Upload (Supports selecting single or multiple files at once)
   const handleUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    setUploadingFileName(file.name);
     setIsUploading(true);
+    let activeSessId = sessionId;
 
-    const formData = new FormData();
-    formData.append('file', file);
-    
-    // Pass session_id if appending to existing multi-doc session
-    let url = '/api/documents/upload';
-    if (sessionId) {
-      url += `?session_id=${sessionId}`;
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      setUploadingFileName(files.length > 1 ? `Uploading (${i + 1}/${files.length}): ${file.name}` : file.name);
+
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      let url = '/api/documents/upload';
+      if (activeSessId) {
+        url += `?session_id=${activeSessId}`;
+      }
+
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!res.ok) throw new Error(`Upload failed for ${file.name}`);
+        const data = await res.json();
+
+        activeSessId = data.session_id;
+        setSessionId(data.session_id);
+        setDocuments((prev) => [...prev, {
+          doc_name: data.doc_name,
+          total_pages: data.total_pages,
+          total_chunks: data.total_chunks
+        }]);
+      } catch (err) {
+        alert(`Document Upload Failed: ${err.message}`);
+      }
     }
 
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!res.ok) throw new Error('Upload failed');
-      const data = await res.json();
-
-      setSessionId(data.session_id);
-      setDocuments((prev) => [...prev, {
-        doc_name: data.doc_name,
-        total_pages: data.total_pages,
-        total_chunks: data.total_chunks
-      }]);
-      setShowUploadPromptModal(false);
-    } catch (err) {
-      alert(`Document Upload Failed: ${err.message}`);
-    } finally {
-      setIsUploading(false);
-      setUploadingFileName('');
-      // Reset input value to allow re-uploading same file
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    }
+    setShowUploadPromptModal(false);
+    setIsUploading(false);
+    setUploadingFileName('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
+
 
 
   // Handle New Session (Purges current session vectors before resetting state)
@@ -185,14 +190,16 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-black text-slate-100 font-sans flex flex-col antialiased">
-      {/* Hidden File Input Element */}
+      {/* Hidden File Input Element supporting single & multiple file selection */}
       <input
         type="file"
         ref={fileInputRef}
         onChange={handleUpload}
         accept=".pdf,.docx"
+        multiple
         className="hidden"
       />
+
 
       {!hasEntered ? (
         <WelcomeHero onEnter={handleEnterWorkspace} />

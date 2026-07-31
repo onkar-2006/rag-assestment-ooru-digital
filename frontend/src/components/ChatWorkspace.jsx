@@ -93,7 +93,7 @@ export default function ChatWorkspace({ messages, onSendMessage, onInspectCitati
                 )}
 
                 {/* Message Content Bubble */}
-                <div className={`p-4 sm:p-5 rounded-2xl text-sm leading-relaxed ${
+                <div className={`p-4 sm:p-5 rounded-2xl text-sm leading-relaxed overflow-hidden break-words max-w-full ${
                   msg.role === 'user'
                     ? 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-lg rounded-tr-none'
                     : 'bg-slate-900/80 border border-slate-800/80 text-slate-200 glass-card rounded-tl-none'
@@ -101,11 +101,12 @@ export default function ChatWorkspace({ messages, onSendMessage, onInspectCitati
                   {msg.role === 'user' ? (
                     <p className="whitespace-pre-wrap">{msg.content}</p>
                   ) : (
-                    <div className="prose prose-invert prose-slate max-w-none text-sm leading-relaxed">
+                    <div className="prose prose-invert prose-slate max-w-none text-sm leading-relaxed overflow-hidden break-words">
                       <ReactMarkdown>{msg.content}</ReactMarkdown>
                     </div>
                   )}
                 </div>
+
 
                 {/* Citations List */}
                 {msg.citations && msg.citations.length > 0 && (

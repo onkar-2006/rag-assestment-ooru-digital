@@ -49,17 +49,18 @@ STRUCTURED_EXTRACTION_PROMPT = """You are a precision Data Extraction Engine. Yo
 USER EXTRACTION REQUEST: {user_request}
 
 Provide the output formatted as valid JSON matching this schema:
-{
+{{
   "document_title": "<Title of document if mentioned>",
   "extracted_fields": [
-    {
+    {{
       "field_name": "<name of field>",
       "value": "<extracted value>",
       "context_snippet": "<supporting quote from text>"
-    }
+    }}
   ]
-}
+}}
 """
+
 
 SELF_REPAIR_PROMPT = """The generated output failed JSON schema validation.
 

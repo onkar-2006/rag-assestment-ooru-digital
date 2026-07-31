@@ -130,3 +130,20 @@ code, pre {
     radial-gradient(at 85% 85%, rgba(6, 182, 212, 0.1) 0px, transparent 50%),
     radial-gradient(at 50% 50%, rgba(168, 85, 247, 0.08) 0px, transparent 50%);
 }
+
+/* Ensure code blocks and pre elements stay within message card bubbles */
+.prose pre {
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  background-color: rgba(3, 7, 18, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 0.75rem !important;
+  padding: 1rem !important;
+}
+
+.prose code {
+  word-break: break-word !important;
+}
+

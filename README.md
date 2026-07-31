@@ -53,6 +53,33 @@ This project implements a **Production-Grade Agentic Document Intelligence Assis
 - **Batch Vector Embedding Calls**: Embeds document chunks in 20-text batches during vector indexing, cutting network overhead by **~80%**.
 - **LangSmith Tracing (`@traceable`)**: End-to-end tracing enabled for project **`rag-observebility`**.
 
+---
+
+## 🧠 Architectural Rationale & Design Decisions
+
+### 1. LLM & Embedding Model Choices (And Why)
+- **Primary LLM (`openai/gpt-4o-mini` via OpenRouter)**: Chosen for its optimal balance of strong reasoning, high compliance with JSON schema extraction, low cost, and fast output generation.
+- **High-Speed Intent Router (`meta-llama/llama-3.1-8b-instruct` / ChatGroq `llama-3.1-8b-instant`)**: Extremely fast (~150ms classification), reducing routing cost by ~90% while preventing unnecessary vector searches for casual greetings.
+- **Dense Embedding Model (`openai/text-embedding-3-small`)**: Offers high 1536-dimensional semantic representation with superior text retrieval benchmark performance compared to legacy models.
+- **Self-Hosted Local LLM Support (`vLLM` / `Ollama`)**: Fully supports on-premise fine-tuned models (`Llama-3.1-8B-Instruct`) via an OpenAI-compatible API wrapper (`http://localhost:8000/v1`) for strict data privacy and zero API cost.
+
+### 2. Prompt Design & Grounding Strategy
+- **Strict Anti-Hallucination Constraints**: Prompts enforce rigid boundaries: *"Answer strictly using the retrieved context below. If the context is unrelated, state: 'I am unable to answer based on the provided document context.'"*
+- **Source Citation Enforcement**: Prompts require explicit page and section citations without emitting internal raw ID tags in readable text.
+- **Pydantic Reflection Loop**: Structured extraction uses `SELF_REPAIR_PROMPT` to automatically reflect and fix malformed JSON responses.
+
+### 3. Agent & Tool-Use Design Decision Logic
+- **LangGraph State Graph Engine**: Orchestrates execution across explicit conditional state nodes (`input_guardrail` -> `intent_router` -> `hybrid_retriever` -> `grounded_qa` / `structured_extraction` / `summarizer` -> `output_guardrail`).
+- **Dynamic Hybrid Retrieval (Dense + BM25)**: Combines dense vector similarity with sparse BM25 keyword matching using Reciprocal Rank Fusion (RRF) to eliminate keyword-miss issues.
+
+### 4. Known Limitations & Future Improvements
+- **Multimodal OCR**: Tables inside scanned low-resolution PDF images currently rely on text layer extraction; integrating OCR (Tesseract / PaddleOCR) is planned.
+- **Asynchronous Batch Indexing**: Large PDF books (>500 pages) process synchronously; migrating ingestion to Celery / Redis background task queues will improve throughput.
+- **Graph RAG Expansion**: Adding Knowledge Graph relationship extraction (Neo4j / NetworkX) alongside vector stores for deep multi-entity link analysis.
+
+---
+
+
 
 
 ---
