@@ -1,0 +1,33 @@
+# Python Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# Python Cache & Compiled Files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Vector DB & Temporary Upload Store
+qdrant_db/
+temp_uploads/
+
+# Node.js & React Frontend Build Outputs
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Environment Variables & Credentials
+.env
+.env.local
+.env.production
+
+# IDE & OS System Files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
