@@ -180,6 +180,25 @@ async def chat_stream(session_id: str, message: str):
 
     return EventSourceResponse(event_generator())
 
+@app.post("/api/session/terminate")
+async def terminate_session(request: Dict[str, Any]):
+    """
+    POST /api/session/terminate
+    Purges Qdrant vector database embeddings and clears in-memory session data.
+    Supports standard JSON requests and navigator.sendBeacon unload payloads.
+    """
+    session_id = request.get("session_id")
+    if not session_id:
+        raise HTTPException(status_code=400, detail="Missing session_id in request body")
+
+    deleted = session_store.delete_session(session_id)
+    return {
+        "status": "success" if deleted else "not_found",
+        "session_id": session_id,
+        "detail": f"Session '{session_id}' vectors purged from Qdrant and memory store."
+    }
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("backend.endpoint.router:app", host="0.0.0.0", port=8000, reload=True)

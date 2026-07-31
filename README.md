@@ -38,19 +38,21 @@ This project implements a **Production-Grade Agentic Document Intelligence Assis
 - **Selective Multi-Document / Cross-Document Reasoning**: Activated dynamically when the user asks to compare multiple uploaded documents side-by-side.
 - **Structured JSON Extractor**: Extracts key-value pairs conforming to Pydantic schemas with an LLM self-repair reflection retry loop.
 
-### 5. Multi-Tenant Session Isolation & Data Privacy (`qdrant_indexer.py`)
+### 5. Multi-Tenant Session Isolation & Automatic Vector Purge (`qdrant_indexer.py`, `memory_store.py`)
 - **Strict `session_id` Vector Payload Filtering**: Every vector chunk indexed into Qdrant is tagged with a unique `session_id` payload attribute.
 - **Payload Indexing & Data Leakage Prevention**: Search queries enforce a Qdrant `FieldCondition` keyword filter on `session_id`. Users can never retrieve or view context from documents uploaded by other sessions.
+- **Automated Session Termination Purge (`POST /api/session/terminate`)**: Automatically purges all document vector embeddings from Qdrant Cloud and clears in-memory caches whenever a user closes the tab (`navigator.sendBeacon`) or starts a new session.
 
-### 6. Production FastAPI Endpoints & Token-by-Token SSE Streaming (`backend/endpoint/`)
-- **Token-by-Token SSE Streaming (`GET /api/chat/stream`)**: Real-time token streaming to frontend clients via Server-Sent Events (`EventSourceResponse`).
+### 6. Production FastAPI Endpoints & Google Gemini-Style SSE Streaming (`backend/endpoint/`)
+- **Token-by-Token SSE Streaming (`GET /api/chat/stream`)**: Real-time word-by-word token streaming with smooth typing pacing (35ms delay) via Server-Sent Events (`EventSourceResponse`).
+- **Normalized Cosine Similarity Match Scores**: Citations display accurate `0% - 100%` normalized vector match percentages (`similarity_score`).
 - **Multi-Document Session Store (`memory_store.py`)**: In-memory session manager supporting multi-document uploads per `session_id`.
-- **Similarity Score Matches**: Every context citation explicitly returns its similarity match score (`similarity_score`).
 
 ### 7. Cost/Latency Optimizations & LangSmith Tracing (`rag-observebility`)
 - **In-Memory Query Response Cache (`cache.py`)**: Sub-millisecond (**<1ms**, **$0.00 API cost**) response retrieval for repeated queries via an LRU cache.
 - **Batch Vector Embedding Calls**: Embeds document chunks in 20-text batches during vector indexing, cutting network overhead by **~80%**.
 - **LangSmith Tracing (`@traceable`)**: End-to-end tracing enabled for project **`rag-observebility`**.
+
 
 
 ---

@@ -49,6 +49,19 @@ class SessionMemoryStore:
             session["history"].append({"role": "user", "content": user_msg})
             session["history"].append({"role": "assistant", "content": assistant_msg})
 
+    def delete_session(self, session_id: str) -> bool:
+        """Purges document vectors from Qdrant and removes in-memory session data."""
+        session = self._sessions.pop(session_id, None)
+        if session and "hybrid_retriever" in session:
+            try:
+                # Purge vectors from Qdrant Cloud / Local DB matching this session_id
+                session["hybrid_retriever"].indexer.delete_session_vectors(session_id)
+            except Exception as err:
+                print(f"⚠️ Warning during vector purge: {err}")
+            return True
+        return False
+
+
 
 # Global singleton in-memory session store
 session_store = SessionMemoryStore()

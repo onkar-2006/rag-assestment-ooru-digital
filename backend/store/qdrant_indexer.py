@@ -194,6 +194,31 @@ class QdrantIndexer:
             })
         return results
 
+    def delete_session_vectors(self, session_id: str) -> Dict[str, Any]:
+        """Deletes all vector points associated with a specific session_id from Qdrant."""
+        if not session_id:
+            return {"status": "error", "detail": "Invalid session_id"}
+
+        try:
+            from qdrant_client.http import models as qmodels
+            self.client.delete(
+                collection_name=self.collection_name,
+                points_selector=qmodels.FilterSelector(
+                    filter=qmodels.Filter(
+                        must=[
+                            qmodels.FieldCondition(
+                                key="session_id",
+                                match=qmodels.MatchValue(value=session_id)
+                            )
+                        ]
+                    )
+                )
+            )
+            return {"status": "success", "session_id": session_id}
+        except Exception as err:
+            print(f"⚠️ Error purging Qdrant vectors for session {session_id}: {err}")
+            return {"status": "error", "detail": str(err)}
+
     def close(self):
         """Closes Qdrant client connection safely."""
         try:
@@ -201,3 +226,4 @@ class QdrantIndexer:
                 self.client.close()
         except Exception:
             pass
+

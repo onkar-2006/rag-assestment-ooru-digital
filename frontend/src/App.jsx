@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import WelcomeHero from './components/WelcomeHero';
 import Sidebar from './components/Sidebar';
 import ChatWorkspace from './components/ChatWorkspace';
@@ -16,6 +16,25 @@ export default function App() {
   // Uploading state
   const [isUploading, setIsUploading] = useState(false);
   const [uploadingFileName, setUploadingFileName] = useState('');
+
+  // Automatic Session Purge on Tab Close / Page Unload
+  useEffect(() => {
+    const handlePageUnload = () => {
+      if (sessionId) {
+        const payload = JSON.stringify({ session_id: sessionId });
+        const blob = new Blob([payload], { type: 'application/json' });
+        navigator.sendBeacon('/api/session/terminate', blob);
+      }
+    };
+
+    window.addEventListener('pagehide', handlePageUnload);
+    window.addEventListener('beforeunload', handlePageUnload);
+
+    return () => {
+      window.removeEventListener('pagehide', handlePageUnload);
+      window.removeEventListener('beforeunload', handlePageUnload);
+    };
+  }, [sessionId]);
 
   const promptSuggestions = [
     { title: "Table Structure Model", prompt: "What AI model is used for table structure recognition?" },
@@ -65,13 +84,26 @@ export default function App() {
   };
 
 
-  // Handle New Session
-  const handleNewSession = () => {
+  // Handle New Session (Purges current session vectors before resetting state)
+  const handleNewSession = async () => {
+    if (sessionId) {
+      try {
+        await fetch('/api/session/terminate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: sessionId })
+        });
+      } catch (err) {
+        console.warn("Failed to purge session on teardown:", err);
+      }
+    }
+
     setSessionId(null);
     setDocuments([]);
     setMessages([]);
     setActiveCitation(null);
   };
+
 
   // Handle Send Message & Token-by-Token SSE Streaming
   const handleSendMessage = async (userPrompt) => {
