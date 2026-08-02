@@ -194,8 +194,8 @@ export default function App() {
       <input
         type="file"
         ref={fileInputRef}
+        accept=".pdf,.docx,.doc,.png,.jpg,.jpeg,.tiff,.bmp"
         onChange={handleUpload}
-        accept=".pdf,.docx"
         multiple
         className="hidden"
       />

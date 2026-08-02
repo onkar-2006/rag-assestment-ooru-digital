@@ -56,6 +56,13 @@ async def upload_document(session_id: Optional[str] = None, file: UploadFile = F
 
     # Save uploaded file asynchronously
     try:
+        allowed_exts = [".pdf", ".docx", ".doc", ".png", ".jpg", ".jpeg", ".tiff", ".bmp"]
+        ext = os.path.splitext(file.filename)[1].lower()
+        if ext not in allowed_exts:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unsupported file format '{file.filename}'. Supported formats: .pdf, .docx, .png, .jpg, .jpeg, .tiff, .bmp"
+            )
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
     except Exception as err:

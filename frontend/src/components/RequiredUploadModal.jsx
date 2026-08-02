@@ -26,7 +26,7 @@ export default function RequiredUploadModal({ isOpen, onUploadClick }) {
             Please Upload a Document First
           </h2>
           <p className="text-sm text-slate-400 leading-relaxed max-w-md mx-auto">
-            This is a specialized <span className="text-slate-200 font-semibold">Document Intelligence Engine</span>. Upload a <span className="text-cyan-400 font-mono text-xs">PDF</span> or <span className="text-cyan-400 font-mono text-xs">DOCX</span> file to begin grounded QA, section summarization, or JSON extraction.
+            This is a specialized <span className="text-slate-200 font-semibold">Document Intelligence Engine</span>. Upload a <span className="text-cyan-400 font-mono text-xs">PDF</span>, <span className="text-cyan-400 font-mono text-xs">DOCX</span>, or <span className="text-cyan-400 font-mono text-xs">IMAGE</span> file to begin grounded QA, section summarization, or JSON extraction.
           </p>
         </div>
 
@@ -37,10 +37,11 @@ export default function RequiredUploadModal({ isOpen, onUploadClick }) {
             className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white font-semibold text-base shadow-xl shadow-indigo-600/30 hover:shadow-indigo-500/40 transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 cursor-pointer"
           >
             <FileText className="w-5 h-5 text-white" />
-            <span>Select PDF / DOCX Document</span>
+            <span>Select PDF / DOCX / Image</span>
             <ArrowUpRight className="w-5 h-5 opacity-80" />
           </button>
         </div>
+
 
         {/* Supported Formats Footnote */}
         <div className="relative z-10 text-xs text-slate-500 pt-1">

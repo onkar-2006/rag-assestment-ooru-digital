@@ -12,10 +12,12 @@ This project implements a **Production-Grade Agentic Document Intelligence Assis
 
 ## 🚀 Key Features & Architectural Pillars
 
-### 1. Ultra-Fast Universal Document Ingestion (`PDF` & `DOCX`)
+### 1. Ultra-Fast Universal Document & Image Ingestion (`PDF`, `DOCX`, `PNG`, `JPG`)
 - **PDF Engine (`FastPDFParser`)**: Built on PyMuPDF's C-extraction engine. Parses dense academic papers in **~7.8 seconds**.
 - **DOCX Engine (`FastDOCXParser`)**: Direct OpenXML DOM structure extractor processing contracts in **~0.03 seconds** (>30 pages/sec).
+- **Standalone Image OCR Engine (`ImageOCRParser`)**: Built on Tesseract C++ OCR & Pillow. Parses receipts, invoices, and standalone document images (`.png`, `.jpg`, `.jpeg`, `.tiff`, `.bmp`) in **~0.25 seconds**!
 - **Spatial Bounding-Box De-duplication**: Filters out text blocks that fall within table boundaries, preventing text duplication.
+
 - **Table Quality Validator**: Eliminates false-positive code-snippet tables from diagrams.
 
 ### 2. Section-Aware Hierarchy & Semantic Chunker (`SectionAwareChunker`)
@@ -91,14 +93,18 @@ This project implements a **Production-Grade Agentic Document Intelligence Assis
 
 ```mermaid
 flowchart TD
-    subgraph Ingestion ["1. Document Ingestion Pipeline Flow (DocumentIntelligencePipeline)"]
-        Upload["Document Upload (.pdf, .docx)"] --> Parser["Document Parser (FastPDFParser / FastDOCXParser)"]
-        Parser --> Layout["Layout & Hierarchy Extraction"]
+    subgraph Ingestion ["1. Universal Ingestion Pipeline Flow (DocumentIntelligencePipeline)"]
+        Upload["Document & Image Upload (.pdf, .docx, .png, .jpg)"] --> Router["Universal Auto-Router Parser\n(document_parser.py)"]
+        Router -->|PDF / DOCX| FastParser["Native Struct Parsers\n(FastPDFParser / FastDOCXParser)"]
+        Router -->|Images: .png/.jpg| OCRParser["Standalone Image OCR Parser\n(ImageOCRParser - Tesseract & Pillow)"]
+        FastParser --> Layout["Layout & Hierarchy Extraction"]
+        OCRParser --> Layout
         Layout --> Chunker["Section-Aware Chunker"]
         Chunker --> Embedder["Batch Vector Embeddings"]
         Embedder --> QdrantIndex["Qdrant Cloud Vector DB Indexer"]
         Chunker --> BM25Index["BM25 Lexical Indexer"]
     end
+
 
     Ingestion --> UI
 
