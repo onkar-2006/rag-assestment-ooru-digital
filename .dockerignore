@@ -1,0 +1,34 @@
+# Docker Ignore File for Production Build
+
+# Virtual Environment & Python Caches
+**/venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Node Modules & Frontend Build Artifacts
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Temporary Uploads & Log Artifacts
+temp_uploads/
+*.log
+*.tmp
+
+# Test PDF Documents
+*.pdf
+2408.09869v5.pdf
+GenAI_Engineer_Assignment (1).pdf
+
+# Git & IDE Metadata
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Fine-Tuning Notebooks & Raw Datasets (Kept for Offline Training)
+llama_finetune/
+local-finetune/

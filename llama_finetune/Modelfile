@@ -1,0 +1,13 @@
+# Ollama Modelfile for Qwen-2.5-3B-Instruct (CPU / Edge Deployment)
+
+FROM qwen2.5:3b
+
+# Set model inference parameters
+PARAMETER temperature 0.1
+PARAMETER top_p 0.95
+PARAMETER num_ctx 4096
+
+# Define Agentic System Prompt
+SYSTEM """
+You are an Agentic Document Intelligence Assistant. Your objective is to answer user questions accurately using provided document context, extract structured Pydantic JSON schemas, and synthesize section summaries without hallucinating.
+"""

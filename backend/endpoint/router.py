@@ -105,9 +105,10 @@ async def chat_message(request: ChatRequest):
     workflow = session["workflow"]
     history = session["history"]
 
-    # Execute LangGraph Workflow
+    # Execute LangGraph Workflow with strict session_id isolation
     try:
-        agent_response = workflow.run(request.message, history=history)
+        agent_response = workflow.run(request.message, history=history, session_id=request.session_id)
+
         
         # Save interaction to in-memory session history
         session_store.add_history(request.session_id, request.message, agent_response.answer)

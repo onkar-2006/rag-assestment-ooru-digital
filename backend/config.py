@@ -24,10 +24,9 @@ class AppConfig(BaseModel):
     router_model: str = os.getenv("ROUTER_MODEL", "meta-llama/llama-3.1-8b-instruct")
 
     # Local / Self-Hosted Fine-Tuned LLM Endpoint Settings (vLLM / Ollama / LM Studio)
-    use_local_llm: bool = os.getenv("USE_LOCAL_LLM", "false").lower() == "true"
-    local_llm_url: str = os.getenv("LOCAL_LLM_URL", "http://localhost:8000/v1")
-    local_llm_model: str = os.getenv("LOCAL_LLM_MODEL", "finetuned_llama3_8b_merged")
-
+    use_local_llm: bool = os.getenv("USE_LOCAL_LLM", "true").lower() == "true"
+    local_llm_url: str = os.getenv("LOCAL_LLM_URL", "http://localhost:11434/v1")
+    local_llm_model: str = os.getenv("LOCAL_LLM_MODEL", "qwen2.5:0.5b")
 
 
     # LangSmith Observability & Tracing Credentials

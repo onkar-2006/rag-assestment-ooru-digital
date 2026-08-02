@@ -90,9 +90,10 @@ class LangGraphDocumentWorkflow:
         out_res = self.output_guardrail.validate_output(answer, chunks)
         if not out_res.is_faithful:
             state["final_answer"] = "I am unable to find relevant information in the provided document to answer your question."
-            state["citations"] = []
+            # Preserve retrieved citations so user can inspect which section was searched
 
         return state
+
 
 
     def _call_router_llm(self, user_query: str) -> Dict[str, str]:
@@ -100,7 +101,7 @@ class LangGraphDocumentWorkflow:
         prompt = INTENT_ROUTER_PROMPT.format(user_input=user_query)
         content = ""
 
-        # 1. Try ChatGroq fast router model first
+        # 1. Use fast cloud ChatGroq / OpenRouter for intent routing so local LLM is reserved 100% for grounded QA
         if self.router_groq_llm or self.groq_llm:
             try:
                 llm = self.router_groq_llm or self.groq_llm
@@ -109,7 +110,8 @@ class LangGraphDocumentWorkflow:
             except Exception:
                 pass
 
-        # 2. Fallback to ChatOpenAI via OpenRouter if Groq is unavailable
+
+        # 3. Fallback to ChatOpenAI via OpenRouter if Groq is unavailable
         if not content and config.openrouter_api_key:
             try:
                 from langchain_openai import ChatOpenAI
@@ -123,6 +125,7 @@ class LangGraphDocumentWorkflow:
                 content = str(res.content).strip()
             except Exception:
                 return {"intent": "document_qa", "reasoning": "Fallback to RAG"}
+
 
         if not content:
             return {"intent": "document_qa", "reasoning": "Fallback to RAG"}

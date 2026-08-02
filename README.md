@@ -61,7 +61,10 @@ This project implements a **Production-Grade Agentic Document Intelligence Assis
 - **Primary LLM (`openai/gpt-4o-mini` via OpenRouter)**: Chosen for its optimal balance of strong reasoning, high compliance with JSON schema extraction, low cost, and fast output generation.
 - **High-Speed Intent Router (`meta-llama/llama-3.1-8b-instruct` / ChatGroq `llama-3.1-8b-instant`)**: Extremely fast (~150ms classification), reducing routing cost by ~90% while preventing unnecessary vector searches for casual greetings.
 - **Dense Embedding Model (`openai/text-embedding-3-small`)**: Offers high 1536-dimensional semantic representation with superior text retrieval benchmark performance compared to legacy models.
-- **Self-Hosted Local LLM Support (`vLLM` / `Ollama`)**: Fully supports on-premise fine-tuned models (`Llama-3.1-8B-Instruct`) via an OpenAI-compatible API wrapper (`http://localhost:8000/v1`) for strict data privacy and zero API cost.
+- **Primary Hosted Cloud API (`openai/gpt-4o-mini` & ChatGroq)**: Instant, zero-latency grounded QA reasoning and ultra-fast (~150ms) intent classification.
+- **Self-Hosted Local LLM Fallback (`Ollama - qwen2.5:0.5b`)**: Fully integrated self-hosted lightweight GGUF model (`qwen2.5:0.5b`, ~397 MB footprint). Automatically serves as a fallback engine if hosted cloud APIs are rate-limited or unreachable.
+
+
 
 ### 2. Prompt Design & Grounding Strategy
 - **Strict Anti-Hallucination Constraints**: Prompts enforce rigid boundaries: *"Answer strictly using the retrieved context below. If the context is unrelated, state: 'I am unable to answer based on the provided document context.'"*

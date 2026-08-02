@@ -39,13 +39,16 @@ class AgentTools:
         self.local_llm = None
         if config.use_local_llm:
             try:
+                # 30.0 second max timeout rule for local LLM before falling back to hosted cloud API
                 self.local_llm = ChatOpenAI(
                     openai_api_key="EMPTY",
                     openai_api_base=config.local_llm_url,
                     model_name=config.local_llm_model,
-                    temperature=0.1
+                    temperature=0.1,
+                    request_timeout=30.0
                 )
-            except Exception:
+            except Exception as e:
+                print(f"⚠️ [INIT WARNING] Local LLM setup failed: {e}")
                 self.local_llm = None
 
         # ChatOpenAI client via OpenRouter API (Passes native usage tokens to LangSmith)
@@ -56,28 +59,62 @@ class AgentTools:
             temperature=0.1
         )
 
+    def _is_local_llm_online(self) -> bool:
+        """Fast ping health check (500ms timeout) to verify local Ollama engine presence."""
+        if not config.use_local_llm or not self.local_llm:
+            return False
+        try:
+            import requests
+            base_host = config.local_llm_url.rstrip("/").rstrip("/v1")
+            res = requests.get(f"{base_host}/api/tags", timeout=0.5)
+            return res.status_code == 200
+        except Exception:
+            return False
+
     @traceable(name="llm_call")
     def _call_llm(self, prompt: str) -> str:
-        """Call LLM via Self-Hosted vLLM, ChatGroq, or ChatOpenAI with automatic LangSmith tracing."""
-        # 1. Priority: Fine-Tuned Local vLLM Server (If enabled & running)
-        if config.use_local_llm and self.local_llm:
-            try:
-                res = self.local_llm.invoke(prompt)
-                return str(res.content).strip()
-            except Exception:
-                pass  # Fallback to Cloud APIs if local server is unreachable
-
-        # 2. Priority: ChatGroq API
+        """
+        Call LLM with Hosted API as PRIMARY (Groq / OpenRouter) for instant zero-latency responses.
+        If Hosted API is over/unavailable, automatically failover to Local LLM.
+        """
+        # 1. Primary: Try Hosted ChatGroq API
         if self.groq_llm:
             try:
                 res = self.groq_llm.invoke(prompt)
-                return str(res.content).strip()
-            except Exception:
-                pass
+                answer = str(res.content).strip()
+                if answer:
+                    print(f"☁️ [LLM PROVIDER]: HOSTED GROQ API ({config.groq_model}) answered query!")
+                    return answer
+            except Exception as err:
+                print(f"⚠️ [HOSTED API WARNING]: Groq API call failed or rate-limited ({err}). Trying OpenRouter...")
 
-        # 3. Priority: OpenRouter API Fallback
-        res = self.openrouter_llm.invoke(prompt)
+        # 2. Secondary: Try Hosted OpenRouter API
+        if config.openrouter_api_key:
+            try:
+                res = self.openrouter_llm.invoke(prompt)
+                answer = str(res.content).strip()
+                if answer:
+                    print(f"☁️ [LLM PROVIDER]: HOSTED OPENROUTER API ({config.llm_model}) answered query!")
+                    return answer
+            except Exception as err:
+                print(f"⚠️ [HOSTED API WARNING]: OpenRouter API call failed ({err}). Falling back to Local LLM engine...")
+
+        # 3. Fallback: Self-Hosted Local Ollama / vLLM LLM Engine
+        if self._is_local_llm_online():
+            try:
+                res = self.local_llm.invoke(prompt)
+                answer = str(res.content).strip()
+                if answer:
+                    print(f"🤖 [LLM PROVIDER FALLBACK]: LOCAL LLM (Ollama - {config.local_llm_model}) answered query!")
+                    return answer
+            except Exception as err:
+                print(f"❌ [LLM PROVIDER ERROR]: Local LLM failed ({err}).")
+
+        raise RuntimeError("All LLM providers (Hosted APIs and Local LLM) are currently unavailable.")
+
         return str(res.content).strip()
+
+
 
 
 
