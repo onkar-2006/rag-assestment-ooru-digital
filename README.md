@@ -91,12 +91,21 @@ This project implements a **Production-Grade Agentic Document Intelligence Assis
 
 ```mermaid
 flowchart TD
-    subgraph UI ["1. Ingestion & Conversational Interface Layer"]
-        Upload["Document Upload (.pdf, .docx)"] --> Pipeline["DocumentIntelligencePipeline"]
+    subgraph Ingestion ["1. Document Ingestion Pipeline Flow (DocumentIntelligencePipeline)"]
+        Upload["Document Upload (.pdf, .docx)"] --> Parser["Document Parser\n(FastPDFParser / FastDOCXParser)"]
+        Parser --> Layout["Layout & Hierarchy Extraction\n(Headings, Tables, Paragraphs)"]
+        Layout --> Chunker["Section-Aware Chunker\n(Header Breadcrumbs & Table Preservation)"]
+        Chunker --> Embedder["Batch Vector Embeddings\n(openai/text-embedding-3-small)"]
+        Embedder --> QdrantIndex["Qdrant Cloud Vector DB Indexer\n(Session-Isolated Payload Tagging)"]
+        Chunker --> BM25Index["BM25 Lexical Indexer\n(rank_bm25 In-Memory Store)"]
+    end
+
+    subgraph UI ["2. Conversational Interface & Cache Layer"]
         UserQuery["User Input Prompt"] --> CacheCheck{"Query LRU Response Cache\n(cache.py)"}
         CacheCheck -->|HIT: <1ms, $0 cost| CachedOutput["Immediate Cached Response"]
         CacheCheck -->|MISS| Workflow["LangGraph Workflow Engine"]
     end
+
 
     subgraph GuardrailsIn ["2. Input Safety Guardrail Layer"]
         Workflow --> InputGuard{"Input Safety Guardrail\n(input_guardrail.py)"}
