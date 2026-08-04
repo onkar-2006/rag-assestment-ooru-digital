@@ -57,7 +57,8 @@ class SessionMemoryStore:
                 # Purge vectors from Qdrant Cloud / Local DB matching this session_id
                 session["hybrid_retriever"].indexer.delete_session_vectors(session_id)
             except Exception as err:
-                print(f"⚠️ Warning during vector purge: {err}")
+                print(f"[MEMORY STORE WARNING] Error during vector purge: {err}")
+
             return True
         return False
 

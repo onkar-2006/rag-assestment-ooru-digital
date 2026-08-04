@@ -23,7 +23,7 @@ class DocumentAgentRunner:
 
     def load_document(self, file_path: str):
         """Ingests document, indexes Qdrant Cloud vectors, and builds BM25 lexical index."""
-        print(f"📄 Processing document into Hybrid Index: {os.path.basename(file_path)}...")
+        print(f"Processing document into Hybrid Index: {os.path.basename(file_path)}...")
         
         # 1. Parse Document & Index Vector Store
         parsed_doc = self.pipeline.parser.parse(file_path)
@@ -35,7 +35,8 @@ class DocumentAgentRunner:
         
         # 3. Instantiate LangGraph Workflow
         self.workflow = LangGraphDocumentWorkflow(self.hybrid_retriever)
-        print(f"✓ Document ready! Built Hybrid Index with {len(chunks)} chunks.\n")
+        print(f"Document ready! Built Hybrid Index with {len(chunks)} chunks.\n")
+
 
     def ask(self, query: str) -> Dict[str, Any]:
         """Executes agent workflow for user prompt."""

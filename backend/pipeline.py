@@ -30,27 +30,27 @@ class DocumentIntelligencePipeline:
         pipeline_start = time.perf_counter()
 
         print(f"==================================================")
-        print(f" 🚀 Document Intelligence Pipeline: {os.path.basename(file_path)}")
+        print(f" Document Intelligence Pipeline: {os.path.basename(file_path)}")
         print(f"==================================================")
 
-        # Stage 1: Universal Document Parsing (PDF & DOCX)
-        print("📄 Stage 1: Parsing Document Structure...")
+        # Stage 1: Parsing Document Structure
+        print("Stage 1: Parsing Document Structure...")
         parsed_doc = self.parser.parse(file_path)
-        print(f"   ✓ Parsed {parsed_doc['total_pages']} pages in {parsed_doc['processing_time_seconds']}s ({parsed_doc['pages_per_second']} pages/sec)")
+        print(f"   Parsed {parsed_doc['total_pages']} pages in {parsed_doc['processing_time_seconds']}s ({parsed_doc['pages_per_second']} pages/sec)")
 
-        # Stage 2: Section-Aware Semantic Chunking
-        print("\n🧩 Stage 2: Generating Section-Aware Chunks...")
+        # Stage 2: Section-Aware Chunking
+        print("\nStage 2: Generating Section-Aware Chunks...")
         chunks = self.chunker.chunk_document(parsed_doc)
-        print(f"   ✓ Generated {len(chunks)} contextual chunks")
+        print(f"   Generated {len(chunks)} contextual chunks")
 
-        # Stage 3: OpenRouter Embeddings & Qdrant Vector Indexing
-        print("\n🌐 Stage 3: Indexing Vector Embeddings to Qdrant...")
+        # Stage 3: Qdrant Vector Indexing
+        print("\nStage 3: Indexing Vector Embeddings to Qdrant...")
         indexing_result = self.indexer.index_chunks(chunks)
-        print(f"   ✓ Indexed {indexing_result['indexed_points']} points into Qdrant (Dimension: {indexing_result['vector_dim']})")
+        print(f"   Indexed {indexing_result['indexed_points']} points into Qdrant (Dimension: {indexing_result['vector_dim']})")
 
         total_elapsed = round(time.perf_counter() - pipeline_start, 2)
         print(f"\n==================================================")
-        print(f" ✅ PIPELINE COMPLETED IN {total_elapsed} SECONDS!")
+        print(f" PIPELINE COMPLETED IN {total_elapsed} SECONDS!")
         print(f"==================================================\n")
 
         return {

@@ -52,10 +52,11 @@ class LangGraphDocumentWorkflow:
                     temperature=0.0
                 )
             except Exception as e:
-                print(f"⚠️ Fast Router ChatGroq init error: {e}")
+                print(f"[WORKFLOW WARNING] Fast Router ChatGroq init error: {e}")
 
         # Build State Graph
         self.graph = self._build_graph()
+
 
     def _build_graph(self) -> StateGraph:
         """Constructs LangGraph State Machine with conditional edges."""
@@ -135,7 +136,7 @@ class LangGraphDocumentWorkflow:
 
         if not decision.is_safe:
             state["guardrail_blocked"] = True
-            state["final_answer"] = f"⚠️ [SECURITY GUARDRAIL TRIGGERED]: {decision.reasoning}"
+            state["final_answer"] = f"[SECURITY GUARDRAIL TRIGGERED]: {decision.reasoning}"
             state["intent"] = "security_blocked"
         else:
             state["guardrail_blocked"] = False
@@ -168,7 +169,8 @@ class LangGraphDocumentWorkflow:
                 parsed = json.loads(cleaned)
                 intent = parsed.get("intent", "document_qa")
             except Exception as err:
-                print(f"⚠️ Fast router failed ({err}). Defaulting intent to 'document_qa'")
+                print(f"[WORKFLOW ROUTER WARNING] Fast router failed ({err}). Defaulting intent to 'document_qa'")
+
 
         # Fallback keyword checks if router is uncertain
         if any(k in query_lower for k in ["extract", "json", "key value", "table", "schema", "dates"]):
@@ -293,7 +295,7 @@ class LangGraphDocumentWorkflow:
         decision = self.output_guardrail.validate_output(answer=answer, context_chunks=chunks)
 
         if not decision.is_faithful:
-            print(f"⚠️ [OUTPUT GUARDRAIL WARNING]: {decision.reasoning}")
+            print(f"[OUTPUT GUARDRAIL WARNING]: {decision.reasoning}")
             # Append soft disclaimers if grounding overlap is low
             state["final_answer"] = f"{answer}\n\n_*Note: Some details in this response could not be strictly verified against source document text._"
 
@@ -310,7 +312,8 @@ class LangGraphDocumentWorkflow:
         # 1. Check LRU Cache
         cached = query_cache.get(query)
         if cached:
-            print(f"⚡ [CACHE HIT]: Returning sub-millisecond cached response for query: '{query}'")
+            print(f"[CACHE HIT]: Returning sub-millisecond cached response for query: '{query}'")
+
             return AgentResponse(
                 answer=cached["answer"],
                 intent=cached["intent"],

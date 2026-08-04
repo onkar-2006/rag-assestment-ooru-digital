@@ -34,7 +34,7 @@ class AgentTools:
                     temperature=0.1
                 )
             except Exception as e:
-                print(f"⚠️ Failed to initialize ChatGroq: {e}")
+                print(f"[LLM INIT WARNING] Failed to initialize ChatGroq: {e}")
 
         self.openrouter_llm = None
         if config.openrouter_api_key:
@@ -46,7 +46,7 @@ class AgentTools:
                     temperature=0.1
                 )
             except Exception as e:
-                print(f"⚠️ Failed to initialize OpenRouter: {e}")
+                print(f"[LLM INIT WARNING] Failed to initialize OpenRouter: {e}")
 
 
         # Local Ollama fallback LLM
@@ -65,19 +65,19 @@ class AgentTools:
         if self.groq_llm:
             try:
                 response = self.groq_llm.invoke(prompt)
-                print("☁️ [LLM PROVIDER]: HOSTED GROQ API (llama-3.3-70b-versatile) answered query!")
+                print("[LLM PROVIDER]: HOSTED GROQ API (llama-3.3-70b-versatile) answered query!")
                 return response.content
             except Exception as err:
-                print(f"⚠️ [LLM PROVIDER FALLBACK]: Groq API failed or rate-limited ({err}). Switching to OpenRouter...")
+                print(f"[LLM PROVIDER FALLBACK]: Groq API failed or rate-limited ({err}). Switching to OpenRouter...")
 
         # Secondary #2: OpenRouter API
         if self.openrouter_llm:
             try:
                 response = self.openrouter_llm.invoke(prompt)
-                print("☁️ [LLM PROVIDER]: HOSTED OPENROUTER API (openai/gpt-4o-mini) answered query!")
+                print("[LLM PROVIDER]: HOSTED OPENROUTER API (openai/gpt-4o-mini) answered query!")
                 return response.content
             except Exception as err:
-                print(f"⚠️ [LLM PROVIDER FALLBACK]: OpenRouter API failed ({err}). Switching to Local Ollama...")
+                print(f"[LLM PROVIDER FALLBACK]: OpenRouter API failed ({err}). Switching to Local Ollama...")
 
         # Tertiary #3: Local Ollama Model
         try:
@@ -89,12 +89,13 @@ class AgentTools:
             }
             resp = requests.post(self.local_llm_url, json=payload, timeout=30)
             if resp.status_code == 200:
-                print(f"🤖 [LLM PROVIDER]: LOCAL LLM (Ollama - {self.local_model}) answered query!")
+                print(f"[LLM PROVIDER]: LOCAL LLM (Ollama - {self.local_model}) answered query!")
                 return resp.json().get("response", "").strip()
             else:
-                print(f"⚠️ Local Ollama returned status {resp.status_code}")
+                print(f"[LLM WARNING] Local Ollama returned status {resp.status_code}")
         except Exception as local_err:
-            print(f"⚠️ Local LLM unreachable: {local_err}")
+            print(f"[LLM WARNING] Local LLM unreachable: {local_err}")
+
 
         return "Error: All LLM providers (Groq, OpenRouter, and Local Ollama) failed to respond."
 

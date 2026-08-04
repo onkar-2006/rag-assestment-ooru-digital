@@ -142,7 +142,7 @@ class QdrantIndexer:
             try:
                 self.client.upsert(collection_name=self.collection_name, points=batch_points)
             except Exception as err:
-                print(f"⚠️ Qdrant Cloud upsert timeout/error: {err}. Falling back to local Qdrant DB...")
+                print(f"[QDRANT WARNING] Cloud upsert timeout/error: {err}. Falling back to local Qdrant DB...")
                 from qdrant_client import QdrantClient
                 local_client = QdrantClient(path="./qdrant_db")
                 if not local_client.collection_exists(self.collection_name):
@@ -222,7 +222,7 @@ class QdrantIndexer:
             )
             return {"status": "success", "session_id": session_id}
         except Exception as err:
-            print(f"⚠️ Error purging Qdrant vectors for session {session_id}: {err}")
+            print(f"[QDRANT WARNING] Error purging Qdrant vectors for session {session_id}: {err}")
             return {"status": "error", "detail": str(err)}
 
     def close(self):

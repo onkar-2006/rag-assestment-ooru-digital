@@ -71,7 +71,8 @@ class ImageOCRParser:
                 ]
             }
         except Exception as err:
-            print(f"⚠️ [OCR ERROR] Failed to parse image {file_name}: {err}")
+            print(f"[OCR ERROR] Failed to parse image {file_name}: {err}")
+
             return {
                 "doc_name": file_name,
                 "total_pages": 1,
