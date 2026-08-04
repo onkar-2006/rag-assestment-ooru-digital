@@ -27,4 +27,3 @@ class AgentResponse(BaseModel):
     intent: str = Field(description="Determined user query intent ('greeting', 'document_qa', 'structured_extraction', 'summarization')")
     citations: List[Citation] = Field(default_factory=list, description="Document citations with similarity scores")
     extracted_data: Optional[Dict[str, Any]] = Field(None, description="Extracted JSON data if requested")
-

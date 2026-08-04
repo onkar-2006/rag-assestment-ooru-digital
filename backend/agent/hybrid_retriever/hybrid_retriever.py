@@ -29,7 +29,6 @@ class HybridRetriever:
         # 1. Dense Vector Search Stream via Qdrant Cloud (filtered strictly by session_id)
         dense_results = self.indexer.search(query, limit=top_k * 2, session_id=session_id)
 
-
         # 2. Sparse BM25 Search Stream
         bm25_results = []
         if self.bm25 and self.indexed_chunks:
@@ -89,4 +88,3 @@ class HybridRetriever:
             hybrid_results.append(item)
 
         return hybrid_results
-

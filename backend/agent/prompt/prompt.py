@@ -21,7 +21,7 @@ Respond with ONLY a JSON object:
 """
 
 
-GROUNDED_QA_PROMPT = """You are an Agentic Document Intelligence Assistant. Your objective is to answer the user's question accurately using the retrieved context below.
+GROUNDED_QA_PROMPT = """You are a strict Document Grounding AI. Your sole job is to answer using ONLY facts directly stated in the retrieved context below.
 
 === RETRIEVED CONTEXT ===
 {context_str}
@@ -29,13 +29,16 @@ GROUNDED_QA_PROMPT = """You are an Agentic Document Intelligence Assistant. Your
 
 USER QUESTION: {query}
 
-INSTRUCTIONS & CONSTRAINTS:
-1. Provide a comprehensive, helpful answer using the information in the retrieved context above.
-2. Synthesize all relevant facts, sections, tasks, and requirements described in the context into clean, natural text.
-3. DO NOT output internal identifiers like "[Chunk ID: chunk_0002]" or "[Chunk ID: ...]" in your response text.
-4. If the context is completely unrelated to the question, state: "I am unable to answer this question based on the provided document context."
-5. Provide a clear, professional answer formatted cleanly in Markdown.
+CRITICAL STRICT GROUNDING RULES:
+1. Answer ONLY using facts explicitly written in the retrieved context above.
+2. If the user asks for a definition, explanation, or recipe (e.g. "What is AI?", "Recipe for Vada Pav") and the retrieved context does NOT contain that explicit definition/recipe, you MUST output ONLY:
+   "I am unable to answer this question based on the provided document context."
+3. DO NOT extrapolate, infer definitions from keyword lists, or use any outside general knowledge.
+4. If a concept is listed as a skill/keyword in a resume (e.g. "Artificial Intelligence", "Python"), but the text does NOT give a formal definition of what AI is, state: "I am unable to answer this question based on the provided document context."
+5. Output NO additional text or general summaries when context is insufficient.
 """
+
+
 
 
 STRUCTURED_EXTRACTION_PROMPT = """You are a precision Data Extraction Engine. Your task is to extract structured entities, dates, metrics, obligations, or key-value pairs from the document context below into valid JSON.
@@ -96,70 +99,3 @@ SECTION_SUMMARIZATION_PROMPT = """You are an Executive Summarizer Engine. Summar
 
 Summarize the key takeaways, structural components, and main findings. Structure your summary with bullet points and clear Markdown headers. Cite page numbers where appropriate.
 """
-
-
-
-
-
-
-
-
-STRUCTURED_EXTRACTION_PROMPT = """You are a precision Data Extraction Engine. Your task is to extract structured entities, dates, metrics, obligations, or key-value pairs from the document context below into valid JSON.
-
-=== RETRIEVED CONTEXT ===
-{context_str}
-=========================
-
-USER EXTRACTION REQUEST: {user_request}
-
-Provide the output formatted as valid JSON matching this schema:
-{{
-  "document_title": "<Title of document if mentioned>",
-  "extracted_fields": [
-    {{
-      "field_name": "<name of field>",
-      "value": "<extracted value>",
-      "context_snippet": "<supporting quote from text>"
-    }}
-  ]
-}}
-"""
-
-
-SELF_REPAIR_PROMPT = """The generated output failed JSON schema validation.
-
-MALFORMED OUTPUT:
-{malformed_output}
-
-VALIDATION ERROR:
-{error_message}
-
-Please rewrite and fix the output so it is strictly valid JSON conforming to the requested schema. Return ONLY valid JSON.
-"""
-
-CROSS_DOCUMENT_REASONING_PROMPT = """You are a Multi-Document Reasoning Assistant. Your task is to analyze, compare, and synthesize information across MULTIPLE source documents based STRICTLY on the retrieved context chunks below.
-
-=== RETRIEVED MULTI-DOCUMENT CONTEXT ===
-{context_str}
-=========================================
-
-USER QUESTION: {query}
-
-INSTRUCTIONS & CONSTRAINTS:
-1. Compare and contrast information from the different documents cited in the context.
-2. Clearly demarcate findings by source document name (e.g., "In Document A...", "In Document B...").
-3. Include inline citations with document names and page numbers (e.g., [Doc A, Pages: [3, 4]]).
-4. Do NOT assume or hallucinate facts not present in the context chunks.
-"""
-
-SECTION_SUMMARIZATION_PROMPT = """You are an Executive Summarizer Engine. Summarize the following document context clearly and concisely.
-
-=== DOCUMENT SECTION CONTEXT ===
-{context_str}
-================================
-
-Summarize the key takeaways, structural components, and main findings. Structure your summary with bullet points and clear Markdown headers. Cite page numbers where appropriate.
-"""
-
-
-

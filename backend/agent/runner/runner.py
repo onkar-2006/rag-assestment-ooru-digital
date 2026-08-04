@@ -1,10 +1,10 @@
 import os
 import sys
 import time
-from typing import List, Dict, Any ,Optional
+from typing import List, Dict, Any, Optional
 from backend.pipeline import DocumentIntelligencePipeline
-from backend.agent.hybrid_retriever import HybridRetriever
-from backend.agent.workflow import LangGraphDocumentWorkflow
+from backend.agent.hybrid_retriever.hybrid_retriever import HybridRetriever
+from backend.agent.workflow.workflow import LangGraphDocumentWorkflow
 
 # Force UTF-8 output encoding for Windows console
 sys.stdout.reconfigure(encoding='utf-8')
