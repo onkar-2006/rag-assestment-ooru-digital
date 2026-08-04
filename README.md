@@ -4,7 +4,14 @@
 
 ---
 
+## 🎬 Project Demo Video
+
+[▶️ Watch Project Demo Video](https://drive.google.com/file/d/1ELD_9aHk7YnvoG0YsklitPNWO1rmBaH5/view?usp=sharing)
+
+---
+
 ## 📌 Executive Summary
+
 
 This project implements a **Production-Grade Agentic Document Intelligence Assistant** that ingests complex documents (PDFs, DOCX files), parses structural hierarchies (headings, paragraphs, bullet lists, atomic tables, and hyperlinks), chunks context dynamically using section breadcrumbs, indexes vectors to a high-speed **Qdrant Cloud Vector Database**, and orchestrates autonomous agentic decisions using a **LangGraph State Workflow**.
 
